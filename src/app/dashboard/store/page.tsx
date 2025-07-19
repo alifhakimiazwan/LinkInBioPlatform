@@ -1,18 +1,39 @@
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StoreManager } from "@/components/dashboard/StoreManager";
 import Link from "next/link";
 import { Instagram, Twitter, Music, Youtube, Link as LinkIcon, Linkedin, Github, Facebook, Twitch } from "lucide-react";
+import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function StorePage() {
-  const user = await requireAuth();
+  // Auth is handled by layout.tsx - get user from auth cookie
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  
+  if (!authUser) {
+    throw new Error('Unauthorized');
+  }
+
+  // Get user from database  
+  const dbUser = await prisma.user.findUnique({
+    where: { id: authUser.id },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      fullName: true,
+      avatar: true,
+      bio: true,
+    }
+  });
+
+  const user = { ...authUser, dbUser };
 
   // Get user's data in parallel for better performance
   const [socialLinks, products] = await Promise.all([
     prisma.socialLink.findMany({
-      where: { userId: user.id },
+      where: { userId: authUser.id },
       orderBy: { position: "asc" },
       select: {
         platform: true,
@@ -22,7 +43,7 @@ export default async function StorePage() {
       }
     }),
     prisma.product.findMany({
-      where: { userId: user.id },
+      where: { userId: authUser.id },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -64,8 +85,7 @@ export default async function StorePage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">My Store</h1>
           <p className="text-gray-600">Manage your profile and products.</p>
@@ -139,7 +159,6 @@ export default async function StorePage() {
             + Add Product
           </Button>
         </Link>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
