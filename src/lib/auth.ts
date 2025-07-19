@@ -11,9 +11,18 @@ export async function getUser() {
     return null
   }
 
-  // Check if user exists in our database
+  // Check if user exists in our database with optimized query
   let dbUser = await prisma.user.findUnique({
-    where: { id: user.id }
+    where: { id: user.id },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      fullName: true,
+      avatar: true,
+      bio: true,
+      createdAt: true,
+    }
   })
 
   // If user doesn't exist in our database, create them
@@ -31,6 +40,15 @@ export async function getUser() {
         username,
         fullName: metadata.full_name || metadata.name || null,
         avatar: metadata.avatar_url || null,
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        fullName: true,
+        avatar: true,
+        bio: true,
+        createdAt: true,
       }
     })
   }

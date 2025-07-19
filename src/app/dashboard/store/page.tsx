@@ -9,17 +9,35 @@ import { Instagram, Twitter, Music, Youtube, Link as LinkIcon, Linkedin, Github,
 export default async function StorePage() {
   const user = await requireAuth();
 
-  // Get user's social links
-  const socialLinks = await prisma.socialLink.findMany({
-    where: { userId: user.id },
-    orderBy: { position: "asc" },
-  });
-
-  // Get user's products
-  const products = await prisma.product.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-  });
+  // Get user's data in parallel for better performance
+  const [socialLinks, products] = await Promise.all([
+    prisma.socialLink.findMany({
+      where: { userId: user.id },
+      orderBy: { position: "asc" },
+      select: {
+        platform: true,
+        url: true,
+        position: true,
+        isActive: true,
+      }
+    }),
+    prisma.product.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        type: true,
+        imageUrl: true,
+        isDraft: true,
+        isActive: true,
+        subtitle: true,
+        buttonText: true,
+        formFields: true,
+      }
+    })
+  ]);
 
   // Helper function to get social icon
   const getSocialIcon = (platform: string) => {
