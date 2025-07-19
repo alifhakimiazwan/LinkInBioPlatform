@@ -4,9 +4,22 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from './Sidebar';
 
+interface User {
+  id: string;
+  email?: string;
+  dbUser: {
+    id: string;
+    email: string;
+    username: string;
+    fullName: string | null;
+    avatar: string | null;
+    bio: string | null;
+  };
+}
+
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
-  user: any;
+  user: User;
 }
 
 export function ClientDashboardLayout({ children, user }: ClientDashboardLayoutProps) {
