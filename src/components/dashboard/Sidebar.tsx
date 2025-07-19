@@ -28,7 +28,7 @@ export function Sidebar({ user }: SidebarProps) {
   ]
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
+    <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="flex items-center px-6 py-4 border-b border-gray-200">
