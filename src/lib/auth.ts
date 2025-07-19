@@ -20,6 +20,7 @@ export async function getUser() {
       username: true,
       fullName: true,
       avatar: true,
+      avatarPath: true,
       bio: true,
       createdAt: true,
     }
@@ -47,6 +48,7 @@ export async function getUser() {
         username: true,
         fullName: true,
         avatar: true,
+        avatarPath: true,
         bio: true,
         createdAt: true,
       }
