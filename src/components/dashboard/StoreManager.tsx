@@ -14,7 +14,7 @@ interface Product {
   isActive: boolean;
   subtitle?: string | null;
   buttonText?: string | null;
-  formFields?: any;
+  formFields?: unknown;
 }
 
 interface User {

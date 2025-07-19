@@ -16,7 +16,7 @@ interface Product {
   type: string;
   isDraft?: boolean;
   isActive: boolean;
-  formFields?: FormField[] | any;
+  formFields?: FormField[] | unknown;
 }
 
 interface MobilePreviewProps {

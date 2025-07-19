@@ -31,6 +31,10 @@ interface Product {
   type: string;
   imageUrl: string | null;
   isDraft?: boolean;
+  isActive: boolean;
+  subtitle?: string | null;
+  buttonText?: string | null;
+  formFields?: unknown;
 }
 
 function SortableProduct({ 

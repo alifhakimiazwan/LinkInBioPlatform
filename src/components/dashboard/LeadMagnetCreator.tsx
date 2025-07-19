@@ -83,7 +83,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
           title: draft.title || "",
           subtitle: draft.subtitle || "",
           buttonText: draft.buttonText || "Get Free Download",
-          fields: draft.formFields || [
+          fields: (draft.formFields as unknown as FormField[]) || [
             { id: "1", type: "name", label: "Name", required: true },
             { id: "2", type: "email", label: "Email", required: true },
           ],

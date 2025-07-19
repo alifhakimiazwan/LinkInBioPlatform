@@ -62,7 +62,7 @@ export function DeleteModal({
           {/* Content */}
           <div className="mb-6">
             <p className="text-gray-600 mb-2">
-              Are you sure you want to delete <span className="font-medium text-gray-900">"{title}"</span>?
+              Are you sure you want to delete <span className="font-medium text-gray-900">&quot;{title}&quot;</span>?
             </p>
             <p className="text-sm text-gray-500">
               {description}

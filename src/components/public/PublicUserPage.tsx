@@ -19,7 +19,7 @@ interface Product {
   type: string;
   isActive: boolean;
   isDraft: boolean;
-  formFields?: FormField[] | any;
+  formFields?: FormField[] | unknown;
   deliveryType?: string | null;
   redirectUrl?: string | null;
 }
