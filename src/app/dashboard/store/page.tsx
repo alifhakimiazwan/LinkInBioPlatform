@@ -30,6 +30,11 @@ export default async function StorePage() {
 
   const user = { ...authUser, dbUser };
 
+  // Fallback if dbUser is null
+  if (!dbUser) {
+    throw new Error('User not found in database');
+  }
+
   // Get user's data in parallel for better performance
   const [socialLinks, products] = await Promise.all([
     prisma.socialLink.findMany({
@@ -95,7 +100,7 @@ export default async function StorePage() {
         <Link href="/dashboard/profile" className="block mb-6">
           <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer">
             <div className="flex items-center space-x-4">
-              {user.dbUser.avatar ? (
+              {user.dbUser?.avatar ? (
                 <img
                   src={user.dbUser.avatar}
                   alt="Profile"
@@ -104,7 +109,7 @@ export default async function StorePage() {
               ) : (
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
                   <span className="text-xl text-gray-500">
-                    {(user.dbUser.fullName || user.dbUser.username)
+                    {(user.dbUser?.fullName || user.dbUser?.username || user.email || 'U')
                       .charAt(0)
                       .toUpperCase()}
                   </span>
@@ -112,9 +117,9 @@ export default async function StorePage() {
               )}
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {user.dbUser.fullName || user.dbUser.username}
+                  {user.dbUser?.fullName || user.dbUser?.username || user.email}
                 </h3>
-                <p className="text-gray-600">@{user.dbUser.username}</p>
+                <p className="text-gray-600">@{user.dbUser?.username || 'user'}</p>
               </div>
               <div className="flex items-center text-gray-400">
                 <span className="text-sm">→</span>
