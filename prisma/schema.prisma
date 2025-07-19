@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  username      String    @unique
+  fullName      String?
+  avatar        String?
+  avatarPath    String?   // Storage path for avatar deletion
+  bio           String?
+  customDomain  String?   @unique
+  theme         String    @default("default")
+  isVerified    Boolean   @default(false)
+  isPro         Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  links         Link[]
+  products      Product[]
+  orders        Order[]
+  analytics     Analytics[]
+  socialLinks   SocialLink[]
+
+  @@map("users")
+}
+
+model Link {
+  id          String    @id @default(uuid())
+  userId      String
+  title       String
+  url         String
+  description String?
+  thumbnail   String?
+  position    Int
+  isActive    Boolean   @default(true)
+  clicks      Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analytics   Analytics[]
+
+  @@map("links")
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  userId        String
+  title         String
+  description   String?
+  price         Decimal
+  currency      String      @default("USD")
+  type          ProductType
+  imageUrl      String?
+  imagePath     String?     // Storage path for image deletion
+  fileUrl       String?     // For digital products
+  filePath      String?     // Storage path for file deletion
+  isActive      Boolean     @default(true)
+  isDraft       Boolean     @default(false)  // New field for draft status
+  stripeProductId String?   @unique
+  stripePriceId String?     @unique
+  
+  // Lead magnet specific fields
+  subtitle      String?     // For lead magnets
+  buttonText    String?     // For lead magnets
+  deliveryType  String?     // 'upload' or 'redirect'
+  redirectUrl   String?     // For redirect delivery
+  formFields    Json?       // Store form field configuration
+  currentStep   Int?        // Track which step user saved draft from
+  fileName      String?     // Original filename for display
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems    OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  userId            String
+  customerEmail     String
+  customerName      String?
+  totalAmount       Decimal
+  currency          String      @default("USD")
+  status            OrderStatus @default(PENDING)
+  stripeSessionId   String?     @unique
+  stripePaymentIntentId String? @unique
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems        OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int     @default(1)
+  price     Decimal
+
+  // Relations
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+model Analytics {
+  id        String      @id @default(uuid())
+  userId    String
+  linkId    String?
+  type      AnalyticsType
+  metadata  Json?       // Store additional data like referrer, location, etc.
+  createdAt DateTime    @default(now())
+
+  // Relations
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link      Link?       @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@map("analytics")
+}
+
+model SocialLink {
+  id        String    @id @default(uuid())
+  userId    String
+  platform  String    // instagram, twitter, youtube, etc.
+  url       String
+  isActive  Boolean   @default(true)
+  position  Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("social_links")
+}
+
+enum ProductType {
+  EBOOK
+  COURSE
+  TEMPLATE
+  CONSULTATION
+  WEBINAR
+  SUBSCRIPTION
+  PHYSICAL
+  DIGITAL
+  COACHING
+  FREE_LEAD
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum AnalyticsType {
+  PROFILE_VIEW
+  LINK_CLICK
+  PRODUCT_VIEW
+  PURCHASE
+}
