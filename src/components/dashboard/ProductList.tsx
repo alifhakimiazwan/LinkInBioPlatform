@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import { DeleteModal } from "@/components/ui/delete-modal";
 import {
   DndContext,
@@ -37,10 +37,10 @@ interface Product {
   formFields?: unknown;
 }
 
-function SortableProduct({ 
-  product, 
-  onDelete 
-}: { 
+function SortableProduct({
+  product,
+  onDelete,
+}: {
   product: Product;
   onDelete: (productId: string) => void;
 }) {
@@ -48,7 +48,7 @@ function SortableProduct({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const {
     attributes,
     listeners,
@@ -67,14 +67,18 @@ function SortableProduct({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
 
     if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showDropdown]);
 
@@ -90,14 +94,14 @@ function SortableProduct({
       if (result.success) {
         // Remove from UI immediately
         onDelete(product.id);
-        toast.success('Product deleted successfully');
+        toast.success("Product deleted successfully");
         setShowDeleteModal(false);
       } else {
-        toast.error('Failed to delete product. Please try again.');
+        toast.error("Failed to delete product. Please try again.");
       }
     } catch (error) {
-      console.error('Error deleting product:', error);
-      toast.error('Failed to delete product. Please try again.');
+      console.error("Error deleting product:", error);
+      toast.error("Failed to delete product. Please try again.");
     } finally {
       setDeleting(false);
     }
@@ -172,35 +176,38 @@ function SortableProduct({
           )}
         </div>
         <p className="text-sm text-gray-500">
-          {product.type === 'FREE_LEAD' ? 'Free' : `$${product.price}`}
+          {product.type === "FREE_LEAD" ? "Free" : `$${product.price}`}
         </p>
       </div>
 
       {/* Actions */}
       <div className="flex items-center space-x-2">
-        <a 
-          href={product.type === 'FREE_LEAD' 
-            ? `/dashboard/store/add-product?type=FREE_LEAD&draftId=${product.id}`
-            : '#'
+        <a
+          href={
+            product.type === "FREE_LEAD"
+              ? `/dashboard/store/add-product?type=FREE_LEAD&draftId=${product.id}`
+              : "#"
           }
         >
-          <Button variant="outline" size="sm">
+          <Button
+            size="sm"
+            className="shadow-none cursor-pointer hover:bg-gray-100"
+          >
             <Edit className="w-4 h-4 mr-1" />
-            Edit
           </Button>
         </a>
-        
+
         {/* Dropdown Menu */}
         <div className="relative" ref={dropdownRef}>
-          <Button 
-            variant="outline" 
+          <Button
             size="sm"
             onClick={() => setShowDropdown(!showDropdown)}
             disabled={deleting}
+            className="shadow-none cursor-pointer hover:bg-gray-100"
           >
             <MoreHorizontal className="w-4 h-4" />
           </Button>
-          
+
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
               <div className="py-1">
@@ -236,7 +243,11 @@ interface ProductListProps {
   onProductDelete?: (productId: string) => void;
 }
 
-export function ProductList({ products, onProductsReorder, onProductDelete }: ProductListProps) {
+export function ProductList({
+  products,
+  onProductsReorder,
+  onProductDelete,
+}: ProductListProps) {
   const [mounted, setMounted] = useState(false);
 
   // Ensure component only renders drag and drop on client
@@ -288,9 +299,9 @@ export function ProductList({ products, onProductsReorder, onProductDelete }: Pr
     return (
       <div className="space-y-3 mt-4">
         {products.map((product) => (
-          <SortableProduct 
-            key={product.id} 
-            product={product} 
+          <SortableProduct
+            key={product.id}
+            product={product}
             onDelete={handleProductDelete}
           />
         ))}
@@ -307,9 +318,9 @@ export function ProductList({ products, onProductsReorder, onProductDelete }: Pr
       <SortableContext items={products} strategy={verticalListSortingStrategy}>
         <div className="space-y-3 mt-4 cursor-pointer">
           {products.map((product) => (
-            <SortableProduct 
-              key={product.id} 
-              product={product} 
+            <SortableProduct
+              key={product.id}
+              product={product}
               onDelete={handleProductDelete}
             />
           ))}

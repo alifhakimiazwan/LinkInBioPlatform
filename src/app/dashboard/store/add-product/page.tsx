@@ -1,4 +1,3 @@
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { ProductEditor } from '@/components/dashboard/ProductEditor'
 import { LeadMagnetCreator } from '@/components/dashboard/LeadMagnetCreator'
 import Link from 'next/link'
@@ -32,8 +31,7 @@ export default async function AddProductPage({ searchParams }: PageProps) {
   const { title, description } = getPageInfo()
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
           <div className="flex items-center space-x-4">
             <Link href="/dashboard/store">
@@ -56,6 +54,5 @@ export default async function AddProductPage({ searchParams }: PageProps) {
           </div>
         )}
       </div>
-    </DashboardLayout>
   )
 }

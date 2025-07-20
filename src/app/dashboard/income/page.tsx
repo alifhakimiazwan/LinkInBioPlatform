@@ -1,9 +1,6 @@
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
-
 export default async function IncomePage() {
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl p-6">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Income</h1>
           <p className="text-gray-600">Track your earnings and revenue.</p>
@@ -16,6 +13,5 @@ export default async function IncomePage() {
           </p>
         </div>
       </div>
-    </DashboardLayout>
   )
 }

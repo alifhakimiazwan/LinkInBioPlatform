@@ -1,11 +1,9 @@
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Welcome back! Here&apos;s what&apos;s happening with your bio page.</p>
@@ -64,6 +62,5 @@ export default async function DashboardPage() {
           </code>
         </div>
       </div>
-    </DashboardLayout>
   )
 }

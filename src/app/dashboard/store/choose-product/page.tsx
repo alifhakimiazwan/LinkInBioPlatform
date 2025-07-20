@@ -1,4 +1,3 @@
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Download, Video, Calendar, Gift } from 'lucide-react'
@@ -32,8 +31,7 @@ export default async function ChooseProductPage() {
   ]
 
   return (
-    <DashboardLayout>
-      <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
           <div className="flex items-center space-x-4">
             <Link href="/dashboard/store">
@@ -110,6 +108,5 @@ export default async function ChooseProductPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   )
 }

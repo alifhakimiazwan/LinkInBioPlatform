@@ -35,48 +35,52 @@ interface StoreManagerProps {
   user: User;
   socialLinks: SocialLink[];
   initialProducts: Product[];
+  onProductsChange?: (products: Product[]) => void;
 }
 
-export function StoreManager({ user, socialLinks, initialProducts }: StoreManagerProps) {
+export function StoreManager({
+  user,
+  socialLinks,
+  initialProducts,
+  onProductsChange,
+}: StoreManagerProps) {
   const [products, setProducts] = useState(initialProducts);
 
   const handleProductsReorder = (newProducts: Product[]) => {
     setProducts(newProducts);
+    onProductsChange?.(newProducts);
   };
 
   const handleProductDelete = (productId: string) => {
-    setProducts(prev => prev.filter(product => product.id !== productId));
+    const updatedProducts = products.filter(
+      (product) => product.id !== productId
+    );
+    setProducts(updatedProducts);
+    onProductsChange?.(updatedProducts);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Left Column - Products */}
-      <div className="lg:col-span-2 space-y-6">
-        {products.length > 0 ? (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Products</h3>
-            <ProductList
-              products={products}
-              onProductsReorder={handleProductsReorder}
-              onProductDelete={handleProductDelete}
-            />
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products yet</h3>
-            <p className="text-gray-600">Start by adding your first product to your store.</p>
-          </div>
-        )}
-      </div>
-
-      {/* Right Column - Mobile Preview */}
-      <div className="lg:sticky lg:top-6">
-        <MobilePreview 
-          user={user} 
-          socialLinks={socialLinks} 
-          products={products}
-        />
-      </div>
-    </div>
+    <>
+      {/* Products Section */}
+      {products.length > 0 ? (
+        <div className="bg-white rounded-lg shadow p-6 my-3">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Products</h3>
+          <ProductList
+            products={products}
+            onProductsReorder={handleProductsReorder}
+            onProductDelete={handleProductDelete}
+          />
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow p-6 text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No products yet
+          </h3>
+          <p className="text-gray-600">
+            Start by adding your first product to your store.
+          </p>
+        </div>
+      )}
+    </>
   );
 }
