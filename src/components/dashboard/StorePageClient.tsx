@@ -36,7 +36,7 @@ interface User {
     username: string;
     bio?: string | null;
     avatar?: string | null;
-  };
+  } | null;
   email?: string;
 }
 
