@@ -26,7 +26,7 @@ interface MobilePreviewProps {
       username: string;
       bio?: string | null;
       avatar?: string | null;
-    };
+    } | null;
   };
   socialLinks: Array<{
     platform: string;
@@ -70,7 +70,7 @@ export function MobilePreview({ user, socialLinks, products = [] }: MobilePrevie
             <div className="p-8 text-center">
               {/* Profile Picture */}
               <div className="mb-4">
-                {user.dbUser.avatar ? (
+                {user.dbUser?.avatar ? (
                   <img
                     src={user.dbUser.avatar}
                     alt="Profile"
@@ -79,7 +79,7 @@ export function MobilePreview({ user, socialLinks, products = [] }: MobilePrevie
                 ) : (
                   <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto flex items-center justify-center">
                     <span className="text-2xl text-gray-500">
-                      {(user.dbUser.fullName || user.dbUser.username)
+                      {(user.dbUser?.fullName || user.dbUser?.username || 'U')
                         .charAt(0)
                         .toUpperCase()}
                     </span>
@@ -89,16 +89,16 @@ export function MobilePreview({ user, socialLinks, products = [] }: MobilePrevie
 
               {/* Display Name */}
               <h1 className="text-xl font-bold text-gray-900 mb-2">
-                {user.dbUser.fullName || user.dbUser.username}
+                {user.dbUser?.fullName || user.dbUser?.username || 'User'}
               </h1>
 
               {/* Username */}
               <p className="text-gray-600 text-sm mb-4">
-                @{user.dbUser.username}
+                @{user.dbUser?.username || 'user'}
               </p>
 
               {/* Bio */}
-              {user.dbUser.bio && (
+              {user.dbUser?.bio && (
                 <p className="text-gray-700 text-sm mb-6 leading-relaxed">
                   {user.dbUser.bio}
                 </p>

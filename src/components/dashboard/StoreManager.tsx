@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { MobilePreview } from "./MobilePreview";
 import { ProductList } from "./ProductList";
 
 interface Product {
