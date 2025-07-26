@@ -163,12 +163,12 @@ export function DigitalProductCreator({
           subtitle: draft.subtitle || "",
           buttonText: draft.buttonText || "Buy Now",
           price: draft.price || "0",
-          description: digitalData?.description || "",
-          ctaButtonText: digitalData?.ctaButtonText || "Purchase Now",
-          collectFields: digitalData?.collectFields || [
+          description: (digitalData?.description as string) || "",
+          ctaButtonText: (digitalData?.ctaButtonText as string) || "Purchase Now",
+          collectFields: (Array.isArray(digitalData?.collectFields) ? digitalData.collectFields : [
             { id: "1", type: "name", label: "Name", required: true },
             { id: "2", type: "email", label: "Email", required: true },
-          ],
+          ]),
           deliveryType:
             (draft.deliveryType as "upload" | "redirect") || "upload",
           fileUrl: draft.fileUrl || "",
@@ -182,7 +182,7 @@ export function DigitalProductCreator({
         }
 
         // Set checkout image preview if it exists
-        if (digitalData.checkoutImageUrl) {
+        if (digitalData.checkoutImageUrl && typeof digitalData.checkoutImageUrl === 'string') {
           setCheckoutImagePreview(digitalData.checkoutImageUrl);
         } else if (draft.imageUrl) {
           // Fallback to main image if no separate checkout image

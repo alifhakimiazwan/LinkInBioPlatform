@@ -191,18 +191,18 @@ export function WebinarCreator({ draftId }: WebinarCreatorProps = {}) {
           subtitle: draft.subtitle || "",
           buttonText: draft.buttonText || "Register Now",
           price: draft.price || "0",
-          description: webinarFormData?.description || "",
-          ctaButtonText: webinarFormData?.ctaButtonText || "Register Now",
-          collectFields: webinarFormData?.collectFields || [
+          description: (webinarFormData?.description as string) || "",
+          ctaButtonText: (webinarFormData?.ctaButtonText as string) || "Register Now",
+          collectFields: (Array.isArray(webinarFormData?.collectFields) ? webinarFormData.collectFields : [
             { id: "1", type: "name", label: "Name", required: true },
             { id: "2", type: "email", label: "Email", required: true },
-          ],
-          webinarDate: webinarFormData?.webinarDate || "",
-          webinarTime: webinarFormData?.webinarTime || "",
-          duration: webinarFormData?.duration || "60",
-          timeZone: webinarFormData?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-          maxAttendees: webinarFormData?.maxAttendees || "100",
-          meetingPlatform: webinarFormData?.meetingPlatform || "zoom",
+          ]),
+          webinarDate: (webinarFormData?.webinarDate as string) || "",
+          webinarTime: (webinarFormData?.webinarTime as string) || "",
+          duration: (webinarFormData?.duration as string) || "60",
+          timeZone: (webinarFormData?.timeZone as string) || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          maxAttendees: (webinarFormData?.maxAttendees as string) || "100",
+          meetingPlatform: (webinarFormData?.meetingPlatform as string) || "zoom",
         });
 
         // Set image previews if they exist
@@ -211,7 +211,7 @@ export function WebinarCreator({ draftId }: WebinarCreatorProps = {}) {
         }
         
         // Set registration image preview if it exists
-        if (webinarFormData.registrationImageUrl) {
+        if (webinarFormData.registrationImageUrl && typeof webinarFormData.registrationImageUrl === 'string') {
           setRegistrationImagePreview(webinarFormData.registrationImageUrl);
         } else if (draft.imageUrl) {
           // Fallback to main image if no separate registration image
@@ -475,7 +475,6 @@ export function WebinarCreator({ draftId }: WebinarCreatorProps = {}) {
           ctaButtonText: webinarData.ctaButtonText,
           collectFields: webinarData.collectFields,
           registrationImageUrl: registrationImageResult.url,
-          webinarUrl: webinarData.webinarUrl,
           webinarDate: webinarData.webinarDate,
           webinarTime: webinarData.webinarTime,
         };
@@ -561,7 +560,6 @@ export function WebinarCreator({ draftId }: WebinarCreatorProps = {}) {
           ctaButtonText: webinarData.ctaButtonText,
           collectFields: webinarData.collectFields,
           registrationImageUrl: registrationImageResult.url,
-          webinarUrl: webinarData.webinarUrl,
           webinarDate: webinarData.webinarDate,
           webinarTime: webinarData.webinarTime,
         };
