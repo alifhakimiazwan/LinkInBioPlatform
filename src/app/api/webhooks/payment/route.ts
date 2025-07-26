@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import Stripe from 'stripe';
 
 // This webhook handler can be called by payment processors (Stripe, PayPal, etc.)
 // to trigger webinar confirmation emails and calendar invitations
@@ -99,7 +100,7 @@ function verifyStripeSignature(
 ): boolean {
   try {
     // This is a simplified example - use the actual Stripe library in production
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2024-12-18.acacia' });
     const event = stripe.webhooks.constructEvent(payload, signature, secret);
     return true;
   } catch (error) {
