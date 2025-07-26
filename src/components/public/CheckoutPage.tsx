@@ -26,7 +26,7 @@ interface Product {
   buttonText?: string | null;
   imageUrl?: string | null;
   type: string;
-  price?: any;
+  price?: string | number;
   formFields?: DigitalProductData | unknown;
 }
 
