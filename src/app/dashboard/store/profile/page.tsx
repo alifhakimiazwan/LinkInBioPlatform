@@ -21,9 +21,7 @@ export default async function ProfileEditPage() {
         <div className="mb-8">
           <div className="flex items-center space-x-4">
             <Link href="/dashboard/store">
-              <Button variant="outline" size="sm">
-                ←
-              </Button>
+              <Button size="sm">←</Button>
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>

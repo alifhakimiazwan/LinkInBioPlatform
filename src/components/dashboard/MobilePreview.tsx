@@ -7,6 +7,22 @@ interface FormField {
   required: boolean;
 }
 
+interface DigitalProductData {
+  style: 'button' | 'callout';
+  description: string;
+  ctaButtonText: string;
+  collectFields: FormField[];
+  checkoutImageUrl?: string;
+}
+
+interface WebinarData {
+  style: 'button' | 'callout';
+  webinarDate: string;
+  webinarTime: string;
+  timeZone: string;
+  duration: string;
+}
+
 interface Product {
   id: string;
   title: string;
@@ -14,6 +30,7 @@ interface Product {
   buttonText?: string | null;
   imageUrl?: string | null;
   type: string;
+  price?: string;
   isDraft?: boolean;
   isActive: boolean;
   formFields?: FormField[] | unknown;
@@ -126,102 +143,237 @@ export function MobilePreview({ user, socialLinks, products = [] }: MobilePrevie
                 <div className="space-y-3 mb-6">
                   {products
                     .filter(product => product.isActive && !product.isDraft)
-                    .map((product) => (
-                    <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                      <div className="flex space-x-3 mb-4">
-                        {/* Thumbnail */}
-                        <div className="flex-shrink-0">
-                          {product.imageUrl ? (
-                            <img
-                              src={product.imageUrl}
-                              alt={product.title}
-                              className="w-16 h-16 object-cover rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                              <Camera className="w-6 h-6 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Title & Subtitle */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-gray-900 mb-1 text-left">
-                            {product.title}
-                          </h3>
-                          <p className="text-xs text-gray-600 line-clamp-2 text-left">
-                            {product.subtitle || "Describe the value of your free resource here"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Form Fields */}
-                      <div className="space-y-3">
-                        {product.type === 'FREE_LEAD' && product.formFields ? (
-                          (product.formFields as FormField[]).map((field) => (
-                            <div key={field.id}>
-                              {/* Show label only for non-name and non-email fields */}
-                              {field.type !== "name" && field.type !== "email" && (
-                                <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  {field.label}{" "}
-                                  {field.required && (
-                                    <span className="text-red-500">*</span>
+                    .map((product) => {
+                      // Handle digital products with different styles
+                      if (product.type === 'DIGITAL') {
+                        const digitalData = product.formFields as DigitalProductData;
+                        
+                        if (digitalData?.style === 'button') {
+                          // Button Style - Simple row layout
+                          return (
+                            <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                                  {product.imageUrl ? (
+                                    <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <Camera className="w-6 h-6 text-gray-400" />
                                   )}
-                                </label>
-                              )}
-                              <input
-                                type={
-                                  field.type === "email"
-                                    ? "email"
-                                    : field.type === "phone"
-                                    ? "tel"
-                                    : "text"
-                                }
-                                placeholder={
-                                  field.type === "name"
-                                    ? "Enter your name"
-                                    : field.type === "email"
-                                    ? "Enter your email"
-                                    : field.type === "phone"
-                                    ? "Enter your phone number"
-                                    : `Enter your ${field.label.toLowerCase()}`
-                                }
-                                disabled
-                                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-700 cursor-not-allowed"
-                              />
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div className="font-medium text-sm text-gray-900">
+                                    {product.title}
+                                  </div>
+                                  <div className="text-purple-600 font-semibold text-sm">
+                                    ${product.price || '0.00'}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                          ))
-                        ) : (
-                          // Default fields for non-lead magnets or products without form fields
-                          <>
-                            <div>
-                              <input
-                                type="text"
-                                placeholder="Enter your name"
-                                disabled
-                                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-700 cursor-not-allowed"
-                              />
+                          );
+                        } else {
+                          // Callout Style - Full card layout
+                          return (
+                            <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                              <div className="flex items-center space-x-3 mb-3">
+                                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                                  {product.imageUrl ? (
+                                    <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <Camera className="w-6 h-6 text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div className="font-medium text-sm text-gray-900">
+                                    {product.title}
+                                  </div>
+                                  <div className="text-gray-600 text-xs">
+                                    {product.subtitle || 'Product subtitle description'}
+                                  </div>
+                                  <div className="text-purple-600 font-semibold text-sm">
+                                    ${product.price || '0.00'}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <button className="w-full bg-purple-600 text-white text-xs py-2 rounded">
+                                {digitalData?.ctaButtonText || product.buttonText || 'Buy Now'}
+                              </button>
                             </div>
-                            <div>
-                              <input
-                                type="email"
-                                placeholder="Enter your email"
-                                disabled
-                                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-700 cursor-not-allowed"
-                              />
-                            </div>
-                          </>
-                        )}
+                          );
+                        }
+                      }
 
-                        <button
-                          disabled
-                          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md text-sm font-medium cursor-not-allowed"
-                        >
-                          {product.buttonText || 'Get Free Download'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                      // Handle webinar products with different styles
+                      if (product.type === 'WEBINAR') {
+                        const webinarData = product.formFields as WebinarData;
+                        
+                        if (webinarData?.style === 'button') {
+                          // Button Style - Simple row layout
+                          return (
+                            <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-3">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                                  {product.imageUrl ? (
+                                    <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <Camera className="w-6 h-6 text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div className="font-medium text-sm text-gray-900">
+                                    {product.title}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mb-1">
+                                    {webinarData?.webinarDate && webinarData?.webinarTime ? 
+                                      `${webinarData.webinarDate} at ${webinarData.webinarTime}` : 
+                                      'Webinar date TBD'
+                                    }
+                                  </div>
+                                  <div className="text-purple-600 font-semibold text-sm">
+                                    ${product.price || '0.00'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          // Callout Style - Full card layout
+                          return (
+                            <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                              <div className="flex items-center space-x-3 mb-3">
+                                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                                  {product.imageUrl ? (
+                                    <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <Camera className="w-6 h-6 text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div className="font-medium text-sm text-gray-900">
+                                    {product.title}
+                                  </div>
+                                  <div className="text-gray-600 text-xs mb-1">
+                                    {product.subtitle || 'Join this exclusive webinar'}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mb-1">
+                                    📅 {webinarData?.webinarDate && webinarData?.webinarTime ? 
+                                      `${webinarData.webinarDate} at ${webinarData.webinarTime}` : 
+                                      'Date TBD'
+                                    }
+                                  </div>
+                                  <div className="text-purple-600 font-semibold text-sm">
+                                    ${product.price || '0.00'}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <button className="w-full bg-purple-600 text-white text-xs py-2 rounded">
+                                {product.buttonText || 'Register Now'}
+                              </button>
+                            </div>
+                          );
+                        }
+                      }
+                      
+                      // Lead Magnet Style (original code)
+                      return (
+                        <div key={product.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                          <div className="flex space-x-3 mb-4">
+                            {/* Thumbnail */}
+                            <div className="flex-shrink-0">
+                              {product.imageUrl ? (
+                                <img
+                                  src={product.imageUrl}
+                                  alt={product.title}
+                                  className="w-16 h-16 object-cover rounded-lg"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                  <Camera className="w-6 h-6 text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Title & Subtitle */}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-sm font-semibold text-gray-900 mb-1 text-left">
+                                {product.title}
+                              </h3>
+                              <p className="text-xs text-gray-600 line-clamp-2 text-left">
+                                {product.subtitle || "Describe the value of your free resource here"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Form Fields */}
+                          <div className="space-y-3">
+                            {product.type === 'FREE_LEAD' && product.formFields ? (
+                              (product.formFields as FormField[]).map((field) => (
+                                <div key={field.id}>
+                                  {/* Show label only for non-name and non-email fields */}
+                                  {field.type !== "name" && field.type !== "email" && (
+                                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                                      {field.label}{" "}
+                                      {field.required && (
+                                        <span className="text-red-500">*</span>
+                                      )}
+                                    </label>
+                                  )}
+                                  <input
+                                    type={
+                                      field.type === "email"
+                                        ? "email"
+                                        : field.type === "phone"
+                                        ? "tel"
+                                        : "text"
+                                    }
+                                    placeholder={
+                                      field.type === "name"
+                                        ? "Enter your name"
+                                        : field.type === "email"
+                                        ? "Enter your email"
+                                        : field.type === "phone"
+                                        ? "Enter your phone number"
+                                        : `Enter your ${field.label.toLowerCase()}`
+                                    }
+                                    disabled
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-700 cursor-not-allowed"
+                                  />
+                                </div>
+                              ))
+                            ) : (
+                              // Default fields for non-lead magnets or products without form fields
+                              <>
+                                <div>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter your name"
+                                    disabled
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-700 cursor-not-allowed"
+                                  />
+                                </div>
+                                <div>
+                                  <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    disabled
+                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded bg-gray-50 text-gray-700 cursor-not-allowed"
+                                  />
+                                </div>
+                              </>
+                            )}
+
+                            <button
+                              disabled
+                              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md text-sm font-medium cursor-not-allowed"
+                            >
+                              {product.buttonText || 'Get Free Download'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </div>

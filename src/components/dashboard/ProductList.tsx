@@ -186,6 +186,10 @@ function SortableProduct({
           href={
             product.type === "FREE_LEAD"
               ? `/dashboard/store/add-product?type=FREE_LEAD&draftId=${product.id}`
+              : product.type === "DIGITAL"
+              ? `/dashboard/store/add-product?type=DIGITAL&draftId=${product.id}`
+              : product.type === "WEBINAR"
+              ? `/dashboard/store/add-product?type=WEBINAR&draftId=${product.id}`
               : "#"
           }
         >

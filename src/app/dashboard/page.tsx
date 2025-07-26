@@ -1,13 +1,18 @@
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { requireAuth } from '@/lib/auth'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
+  const user = await requireAuth()
+  
   return (
     <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here&apos;s what&apos;s happening with your bio page.</p>
-        </div>
+        <PageHeader 
+          title="Dashboard" 
+          description="Welcome back! Here's what's happening with your bio page."
+          username={user.dbUser?.username || ''}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow">

@@ -2,7 +2,7 @@
 
 import { requireAuth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+import { Prisma, ProductType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 export async function saveDraftAction(formData: FormData) {
@@ -19,6 +19,7 @@ export async function saveDraftAction(formData: FormData) {
   const fileUrl = formData.get('fileUrl') as string
   const fileName = formData.get('fileName') as string
   const currentStep = formData.get('currentStep') as string
+  const price = formData.get('price') as string
 
   try {
     // Create or update draft product
@@ -27,8 +28,8 @@ export async function saveDraftAction(formData: FormData) {
         userId: user.id,
         title: title || 'Untitled Draft',
         description: subtitle || '',
-        price: new Prisma.Decimal(0), // Free for lead magnets
-        type: productType === 'FREE_LEAD' ? 'FREE_LEAD' : 'DIGITAL',
+        price: new Prisma.Decimal(price || '0'),
+        type: productType as ProductType,
         imageUrl: imageUrl || null,
         fileUrl: fileUrl || null,
         fileName: fileName || null,
@@ -68,6 +69,7 @@ export async function updateDraftAction(formData: FormData) {
   const fileUrl = formData.get('fileUrl') as string
   const fileName = formData.get('fileName') as string
   const currentStep = formData.get('currentStep') as string
+  const price = formData.get('price') as string
 
   try {
     // First get existing product to preserve imageUrl if new one not provided
@@ -92,6 +94,7 @@ export async function updateDraftAction(formData: FormData) {
       data: {
         title: title || 'Untitled Draft',
         description: subtitle || '',
+        price: price ? new Prisma.Decimal(price) : existingDraft.price,
         imageUrl: imageUrl || existingDraft.imageUrl, // Preserve existing if no new image
         fileUrl: fileUrl || existingDraft.fileUrl, // Preserve existing if no new file
         fileName: fileName || existingDraft.fileName, // Preserve existing if no new file
@@ -195,6 +198,7 @@ export async function loadDraftAction(draftId: string) {
         title: draft.title,
         subtitle: draft.subtitle,
         buttonText: draft.buttonText,
+        price: draft.price.toString(),
         imageUrl: draft.imageUrl,
         fileUrl: draft.fileUrl,
         fileName: draft.fileName,

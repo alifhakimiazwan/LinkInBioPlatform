@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { StorePageClient } from "@/components/dashboard/StorePageClient";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
@@ -66,10 +67,11 @@ export default async function StorePage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">My Store</h1>
-        <p className="text-gray-600">Manage your profile and products.</p>
-      </div>
+      <PageHeader 
+        title="My Store" 
+        description="Manage your profile and products."
+        username={user.dbUser?.username || ''}
+      />
 
       <StorePageClient
         user={user}

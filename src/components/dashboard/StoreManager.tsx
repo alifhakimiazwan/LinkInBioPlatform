@@ -60,25 +60,12 @@ export function StoreManager({
 
   return (
     <>
-      {/* Products Section */}
-      {products.length > 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 my-3">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Products</h3>
-          <ProductList
-            products={products}
-            onProductsReorder={handleProductsReorder}
-            onProductDelete={handleProductDelete}
-          />
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow p-6 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No products yet
-          </h3>
-          <p className="text-gray-600">
-            Start by adding your first product to your store.
-          </p>
-        </div>
+      {products.length > 0 && (
+        <ProductList
+          products={products}
+          onProductsReorder={handleProductsReorder}
+          onProductDelete={handleProductDelete}
+        />
       )}
     </>
   );

@@ -92,6 +92,7 @@ export default async function UserPage({ params }: PageProps) {
       buttonText: true,
       imageUrl: true,
       type: true,
+      price: true,
       formFields: true,
       deliveryType: true,
       redirectUrl: true,
@@ -109,6 +110,7 @@ export default async function UserPage({ params }: PageProps) {
       socialLinks={socialLinks}
       products={products.map(product => ({
         ...product,
+        price: product.price ? Number(product.price) : 0,
         isActive: true,
         isDraft: false,
       }))}

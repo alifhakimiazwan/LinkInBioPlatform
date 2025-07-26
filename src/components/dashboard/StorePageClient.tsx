@@ -15,6 +15,8 @@ import {
   Github,
   Facebook,
   Twitch,
+  Edit,
+  Plus,
 } from "lucide-react";
 
 interface Product {
@@ -51,7 +53,11 @@ interface StorePageClientProps {
   initialProducts: Product[];
 }
 
-export function StorePageClient({ user, socialLinks, initialProducts }: StorePageClientProps) {
+export function StorePageClient({
+  user,
+  socialLinks,
+  initialProducts,
+}: StorePageClientProps) {
   const [products, setProducts] = useState(initialProducts);
 
   // Helper function to get social icon
@@ -87,7 +93,7 @@ export function StorePageClient({ user, socialLinks, initialProducts }: StorePag
       <div className="lg:col-span-2 space-y-6">
         {/* Profile Overview */}
         <Link href="/dashboard/profile">
-          <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow cursor-pointer">
+          <div className="bg-white rounded-2xl shadow-none p-6 hover:shadow-sm transition-shadow cursor-pointer">
             <div className="flex items-center space-x-4">
               {user.dbUser?.avatar ? (
                 <img
@@ -111,16 +117,14 @@ export function StorePageClient({ user, socialLinks, initialProducts }: StorePag
               )}
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {user.dbUser?.fullName ||
-                    user.dbUser?.username ||
-                    user.email}
+                  {user.dbUser?.fullName || user.dbUser?.username || user.email}
                 </h3>
                 <p className="text-gray-600">
                   @{user.dbUser?.username || "user"}
                 </p>
               </div>
-              <div className="flex items-center text-gray-400">
-                <span className="text-sm">→</span>
+              <div className=" text-orange-400">
+                <Edit className="w-4 h-4" />
               </div>
             </div>
 
@@ -147,20 +151,41 @@ export function StorePageClient({ user, socialLinks, initialProducts }: StorePag
           </div>
         </Link>
 
-        {/* Store Manager - Products */}
-        <StoreManager
-          user={user}
-          socialLinks={socialLinks}
-          initialProducts={products}
-          onProductsChange={setProducts}
-        />
-
-        {/* Add Product Button */}
-        <Link href="/dashboard/store/choose-product">
-          <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2">
-            + Add Product
-          </Button>
-        </Link>
+        {/* Products Section */}
+        {products.length > 0 ? (
+          <div className="bg-white rounded-3xl shadow-none p-6 my-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Products</h3>
+              <Link href="/dashboard/store/choose-product">
+                <Button className="border border-orange-400 rounded-full text-white bg-orange-600 hover:bg-orange-700 text-sm shadow-none cursor-pointer">
+                  <Plus className="w-4 h-4 mr-2" /> Add Product
+                </Button>
+              </Link>
+            </div>
+            <StoreManager
+              user={user}
+              socialLinks={socialLinks}
+              initialProducts={products}
+              onProductsChange={setProducts}
+            />
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl shadow-none p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Products</h3>
+              <Link href="/dashboard/store/choose-product">
+                <Button className="bg-orange-400 hover:bg-orange-600 text-white cursor-pointer">
+                  <Plus className="w-4 h-4 mr-2" /> Add Product
+                </Button>
+              </Link>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-600">
+                Start by adding your first product to your store.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* RIGHT COLUMN - Mobile Preview */}

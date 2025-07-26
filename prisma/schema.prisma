@@ -22,6 +22,12 @@ model User {
   theme         String    @default("default")
   isVerified    Boolean   @default(false)
   isPro         Boolean   @default(false)
+  
+  // Google Calendar Integration
+  googleAccessToken   String?
+  googleRefreshToken  String?
+  googleTokenExpiry   DateTime?
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -31,6 +37,7 @@ model User {
   orders        Order[]
   analytics     Analytics[]
   socialLinks   SocialLink[]
+  leads         Lead[]
 
   @@map("users")
 }
@@ -81,12 +88,18 @@ model Product {
   currentStep   Int?        // Track which step user saved draft from
   fileName      String?     // Original filename for display
   
+  // Google Calendar integration for webinars
+  googleEventId     String?   // Google Calendar event ID
+  googleMeetLink    String?   // Google Meet link
+  googleCalendarLink String? // Link to calendar event
+  
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   // Relations
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderItems    OrderItem[]
+  leads         Lead[]
 
   @@map("products")
 }
@@ -154,6 +167,28 @@ model SocialLink {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("social_links")
+}
+
+model Lead {
+  id            String    @id @default(uuid())
+  userId        String    // Product owner
+  productId     String    // Product that generated this lead
+  customerEmail String
+  customerName  String?
+  customerPhone String?
+  formData      Json      // Store all form field data
+  ipAddress     String?
+  userAgent     String?
+  source        String    @default("public_page") // "public_page", "social", etc.
+  emailSent     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("leads")
 }
 
 enum ProductType {

@@ -2,8 +2,30 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, X, ChevronDown, Upload, Link, FileText, Save } from "lucide-react";
-import { saveDraftAction, updateDraftAction, loadDraftAction, finalizeDraftAction } from "@/app/dashboard/store/draft-actions";
+import { StepIndicator } from "@/components/ui/step-indicator";
+import {
+  Camera,
+  X,
+  ChevronDown,
+  Upload,
+  Link,
+  FileText,
+  Save,
+  ImageIcon,
+  ArrowLeft,
+  ArrowRight,
+  User,
+  Mail,
+  Phone,
+  MessageSquare,
+  HelpCircle,
+} from "lucide-react";
+import {
+  saveDraftAction,
+  updateDraftAction,
+  loadDraftAction,
+  finalizeDraftAction,
+} from "@/app/dashboard/store/draft-actions";
 import { useRouter } from "next/navigation";
 import { uploadFile, validateImageFile } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/client";
@@ -22,7 +44,7 @@ interface LeadMagnetData {
   subtitle: string;
   buttonText: string;
   fields: FormField[];
-  deliveryType: 'upload' | 'redirect';
+  deliveryType: "upload" | "redirect";
   fileUpload?: File;
   fileUrl?: string; // For saved files
   fileName?: string; // Original filename for display
@@ -50,11 +72,11 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
       { id: "1", type: "name", label: "Name", required: true },
       { id: "2", type: "email", label: "Email", required: true },
     ],
-    deliveryType: 'upload',
+    deliveryType: "upload",
     fileUpload: undefined,
-    fileUrl: '',
-    fileName: '',
-    redirectUrl: '',
+    fileUrl: "",
+    fileName: "",
+    redirectUrl: "",
   });
 
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -69,15 +91,15 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
 
   const loadDraftData = async () => {
     if (!draftId) return;
-    
+
     setLoading(true);
     try {
       const result = await loadDraftAction(draftId);
-      
+
       if (result.success && result.draft) {
         const draft = result.draft;
         setIsEditing(true);
-        
+
         // Load draft data
         setLeadMagnetData({
           title: draft.title || "",
@@ -87,7 +109,8 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
             { id: "1", type: "name", label: "Name", required: true },
             { id: "2", type: "email", label: "Email", required: true },
           ],
-          deliveryType: (draft.deliveryType as 'upload' | 'redirect') || 'upload',
+          deliveryType:
+            (draft.deliveryType as "upload" | "redirect") || "upload",
           fileUrl: draft.fileUrl || "",
           fileName: draft.fileName || "",
           redirectUrl: draft.redirectUrl || "",
@@ -103,12 +126,11 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
         setCurrentStep(startStep);
       }
     } catch (error) {
-      console.error('Error loading draft:', error);
+      console.error("Error loading draft:", error);
     } finally {
       setLoading(false);
     }
   };
-
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -127,39 +149,46 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
-    setLeadMagnetData(prev => ({
+
+    setLeadMagnetData((prev) => ({
       ...prev,
-      fileUpload: file
+      fileUpload: file,
     }));
   };
 
   const handleSaveDraft = async () => {
     setSaving(true);
-    
+
     try {
-      let imageUrl = '';
-      let fileUrl = '';
-      
+      let imageUrl = "";
+      let fileUrl = "";
+
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
-      
+
       // Upload image if one is selected, otherwise preserve existing
       if (imageFile) {
         const validation = validateImageFile(imageFile);
         if (validation) {
           throw new Error(validation);
         }
-        
+
         try {
-          const uploadResult = await uploadFile(imageFile, 'products', 'lead-magnets', user.id);
+          const uploadResult = await uploadFile(
+            imageFile,
+            "products",
+            "lead-magnets",
+            user.id
+          );
           imageUrl = uploadResult.url;
         } catch (uploadError) {
-          throw new Error('Failed to upload image');
+          throw new Error("Failed to upload image");
         }
       } else if (imagePreview && isEditing) {
         // Preserve existing image URL when editing
@@ -167,53 +196,66 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
       }
 
       // Upload file if one is selected for upload delivery type
-      let fileName = '';
-      if (leadMagnetData.deliveryType === 'upload' && leadMagnetData.fileUpload) {
+      let fileName = "";
+      if (
+        leadMagnetData.deliveryType === "upload" &&
+        leadMagnetData.fileUpload
+      ) {
         try {
-          const fileUploadResult = await uploadFile(leadMagnetData.fileUpload, 'products', 'lead-magnets', user.id);
+          const fileUploadResult = await uploadFile(
+            leadMagnetData.fileUpload,
+            "products",
+            "lead-magnets",
+            user.id
+          );
           fileUrl = fileUploadResult.url;
           fileName = leadMagnetData.fileUpload.name; // Store original filename
         } catch (uploadError) {
-          throw new Error('Failed to upload file');
+          throw new Error("Failed to upload file");
         }
       } else if (leadMagnetData.fileUrl && isEditing) {
         // Preserve existing file URL and filename when editing
         fileUrl = leadMagnetData.fileUrl;
-        fileName = leadMagnetData.fileName || '';
+        fileName = leadMagnetData.fileName || "";
       }
 
       const formData = new FormData();
-      formData.append('title', leadMagnetData.title || 'Untitled Lead Magnet');
-      formData.append('subtitle', leadMagnetData.subtitle);
-      formData.append('buttonText', leadMagnetData.buttonText);
-      formData.append('deliveryType', leadMagnetData.deliveryType);
-      formData.append('redirectUrl', leadMagnetData.redirectUrl || '');
-      formData.append('formFields', JSON.stringify(leadMagnetData.fields));
-      formData.append('productType', 'FREE_LEAD');
-      formData.append('imageUrl', imageUrl);
-      formData.append('fileUrl', fileUrl);
-      formData.append('fileName', fileName);
-      formData.append('currentStep', currentStep.toString());
+      formData.append("title", leadMagnetData.title || "Untitled Lead Magnet");
+      formData.append("subtitle", leadMagnetData.subtitle);
+      formData.append("buttonText", leadMagnetData.buttonText);
+      formData.append("deliveryType", leadMagnetData.deliveryType);
+      formData.append("redirectUrl", leadMagnetData.redirectUrl || "");
+      formData.append("formFields", JSON.stringify(leadMagnetData.fields));
+      formData.append("productType", "FREE_LEAD");
+      formData.append("imageUrl", imageUrl);
+      formData.append("fileUrl", fileUrl);
+      formData.append("fileName", fileName);
+      formData.append("currentStep", currentStep.toString());
 
       // Add product ID if editing
       if (isEditing && draftId) {
-        formData.append('productId', draftId);
+        formData.append("productId", draftId);
       }
 
-      const result = isEditing && draftId 
-        ? await updateDraftAction(formData)
-        : await saveDraftAction(formData);
-      
+      const result =
+        isEditing && draftId
+          ? await updateDraftAction(formData)
+          : await saveDraftAction(formData);
+
       if (result.success) {
         // Redirect back to My Store
-        router.push('/dashboard/store');
+        router.push("/dashboard/store");
       } else {
-        console.error('Failed to save draft:', result.error);
-        alert('Failed to save draft. Please try again.');
+        console.error("Failed to save draft:", result.error);
+        alert("Failed to save draft. Please try again.");
       }
     } catch (error) {
-      console.error('Error saving draft:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save draft. Please try again.');
+      console.error("Error saving draft:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to save draft. Please try again."
+      );
     } finally {
       setSaving(false);
     }
@@ -221,114 +263,148 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
 
   const handleCreateLeadMagnet = async () => {
     setFinalizing(true);
-    
+
     try {
-      let imageUrl = '';
-      let fileUrl = '';
-      
+      let imageUrl = "";
+      let fileUrl = "";
+
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
-        throw new Error('User not authenticated');
+        throw new Error("User not authenticated");
       }
-      
+
       // Upload image if one is selected, otherwise preserve existing
       if (imageFile) {
         const validation = validateImageFile(imageFile);
         if (validation) {
           throw new Error(validation);
         }
-        
+
         try {
-          const uploadResult = await uploadFile(imageFile, 'products', 'lead-magnets', user.id);
+          const uploadResult = await uploadFile(
+            imageFile,
+            "products",
+            "lead-magnets",
+            user.id
+          );
           imageUrl = uploadResult.url;
         } catch (uploadError) {
-          throw new Error('Failed to upload image');
+          throw new Error("Failed to upload image");
         }
       } else if (imagePreview) {
         imageUrl = imagePreview;
       }
 
       // Upload file if one is selected for upload delivery type
-      let fileName = '';
-      if (leadMagnetData.deliveryType === 'upload' && leadMagnetData.fileUpload) {
+      let fileName = "";
+      if (
+        leadMagnetData.deliveryType === "upload" &&
+        leadMagnetData.fileUpload
+      ) {
         try {
-          const fileUploadResult = await uploadFile(leadMagnetData.fileUpload, 'products', 'lead-magnets', user.id);
+          const fileUploadResult = await uploadFile(
+            leadMagnetData.fileUpload,
+            "products",
+            "lead-magnets",
+            user.id
+          );
           fileUrl = fileUploadResult.url;
           fileName = leadMagnetData.fileUpload.name; // Store original filename
         } catch (uploadError) {
-          throw new Error('Failed to upload file');
+          throw new Error("Failed to upload file");
         }
       } else if (leadMagnetData.fileUrl) {
         fileUrl = leadMagnetData.fileUrl;
-        fileName = leadMagnetData.fileName || '';
+        fileName = leadMagnetData.fileName || "";
       }
 
       const formData = new FormData();
-      formData.append('title', leadMagnetData.title || 'Untitled Lead Magnet');
-      formData.append('subtitle', leadMagnetData.subtitle);
-      formData.append('buttonText', leadMagnetData.buttonText);
-      formData.append('deliveryType', leadMagnetData.deliveryType);
-      formData.append('redirectUrl', leadMagnetData.redirectUrl || '');
-      formData.append('formFields', JSON.stringify(leadMagnetData.fields));
-      formData.append('productType', 'FREE_LEAD');
-      formData.append('imageUrl', imageUrl);
+      formData.append("title", leadMagnetData.title || "Untitled Lead Magnet");
+      formData.append("subtitle", leadMagnetData.subtitle);
+      formData.append("buttonText", leadMagnetData.buttonText);
+      formData.append("deliveryType", leadMagnetData.deliveryType);
+      formData.append("redirectUrl", leadMagnetData.redirectUrl || "");
+      formData.append("formFields", JSON.stringify(leadMagnetData.fields));
+      formData.append("productType", "FREE_LEAD");
+      formData.append("imageUrl", imageUrl);
 
       let result;
-      
+
       if (isEditing && draftId) {
         // Finalize existing draft
-        formData.append('productId', draftId);
-        formData.append('fileUrl', fileUrl);
-        formData.append('fileName', fileName);
+        formData.append("productId", draftId);
+        formData.append("fileUrl", fileUrl);
+        formData.append("fileName", fileName);
         result = await finalizeDraftAction(formData);
       } else {
         // Create new product directly (not as draft)
         const createFormData = new FormData();
-        createFormData.append('title', leadMagnetData.title || 'Untitled Lead Magnet');
-        createFormData.append('subtitle', leadMagnetData.subtitle);
-        createFormData.append('buttonText', leadMagnetData.buttonText);
-        createFormData.append('deliveryType', leadMagnetData.deliveryType);
-        createFormData.append('redirectUrl', leadMagnetData.redirectUrl || '');
-        createFormData.append('formFields', JSON.stringify(leadMagnetData.fields));
-        createFormData.append('productType', 'FREE_LEAD');
-        createFormData.append('imageUrl', imageUrl);
-        createFormData.append('fileUrl', fileUrl);
-        createFormData.append('fileName', fileName);
-        createFormData.append('currentStep', '4'); // Final step
+        createFormData.append(
+          "title",
+          leadMagnetData.title || "Untitled Lead Magnet"
+        );
+        createFormData.append("subtitle", leadMagnetData.subtitle);
+        createFormData.append("buttonText", leadMagnetData.buttonText);
+        createFormData.append("deliveryType", leadMagnetData.deliveryType);
+        createFormData.append("redirectUrl", leadMagnetData.redirectUrl || "");
+        createFormData.append(
+          "formFields",
+          JSON.stringify(leadMagnetData.fields)
+        );
+        createFormData.append("productType", "FREE_LEAD");
+        createFormData.append("imageUrl", imageUrl);
+        createFormData.append("fileUrl", fileUrl);
+        createFormData.append("fileName", fileName);
+        createFormData.append("currentStep", "4"); // Final step
 
         // Save as draft first, then finalize it
         const draftResult = await saveDraftAction(createFormData);
         if (draftResult.success && draftResult.productId) {
           const finalizeFormData = new FormData();
-          finalizeFormData.append('productId', draftResult.productId);
-          finalizeFormData.append('title', leadMagnetData.title || 'Untitled Lead Magnet');
-          finalizeFormData.append('subtitle', leadMagnetData.subtitle);
-          finalizeFormData.append('buttonText', leadMagnetData.buttonText);
-          finalizeFormData.append('deliveryType', leadMagnetData.deliveryType);
-          finalizeFormData.append('redirectUrl', leadMagnetData.redirectUrl || '');
-          finalizeFormData.append('formFields', JSON.stringify(leadMagnetData.fields));
-          finalizeFormData.append('imageUrl', imageUrl);
-          finalizeFormData.append('fileUrl', fileUrl);
-          finalizeFormData.append('fileName', fileName);
-          
+          finalizeFormData.append("productId", draftResult.productId);
+          finalizeFormData.append(
+            "title",
+            leadMagnetData.title || "Untitled Lead Magnet"
+          );
+          finalizeFormData.append("subtitle", leadMagnetData.subtitle);
+          finalizeFormData.append("buttonText", leadMagnetData.buttonText);
+          finalizeFormData.append("deliveryType", leadMagnetData.deliveryType);
+          finalizeFormData.append(
+            "redirectUrl",
+            leadMagnetData.redirectUrl || ""
+          );
+          finalizeFormData.append(
+            "formFields",
+            JSON.stringify(leadMagnetData.fields)
+          );
+          finalizeFormData.append("imageUrl", imageUrl);
+          finalizeFormData.append("fileUrl", fileUrl);
+          finalizeFormData.append("fileName", fileName);
+
           result = await finalizeDraftAction(finalizeFormData);
         } else {
           result = draftResult;
         }
       }
-      
+
       if (result.success) {
         // Redirect back to My Store
-        router.push('/dashboard/store');
+        router.push("/dashboard/store");
       } else {
-        console.error('Failed to create lead magnet:', result.error);
-        alert('Failed to create lead magnet. Please try again.');
+        console.error("Failed to create lead magnet:", result.error);
+        alert("Failed to create lead magnet. Please try again.");
       }
     } catch (error) {
-      console.error('Error creating lead magnet:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create lead magnet. Please try again.');
+      console.error("Error creating lead magnet:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to create lead magnet. Please try again."
+      );
     } finally {
       setFinalizing(false);
     }
@@ -391,14 +467,14 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 text-sm">
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-2">
-                Step 1: Select Image
+                <span className="text-orange-600 rounded-full bg-orange-50 px-3 py-1 text-md mr-3">
+                  1
+                </span>{" "}
+                Select Image
               </h2>
-              <p className="text-gray-400 mb-6 text-sm">
-                Choose an attractive image for your lead magnet.
-              </p>
             </div>
 
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
@@ -412,17 +488,19 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                   <Button
                     variant="outline"
                     onClick={() => imageInputRef.current?.click()}
+                    className="text-sm shadow-none"
                   >
                     Change Image
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <Camera className="mx-auto w-12 h-12 text-gray-400" />
+                  <ImageIcon className="mx-auto w-12 h-12 text-gray-400" />
                   <div>
                     <Button
                       variant="outline"
                       onClick={() => imageInputRef.current?.click()}
+                      className="text-sm shadow-none"
                     >
                       Upload Image
                     </Button>
@@ -445,14 +523,14 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
 
       case 2:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 text-sm">
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Step 2: Add Text
+                <span className="text-orange-600 rounded-full bg-orange-50 px-3 py-1 text-md mr-3">
+                  2
+                </span>{" "}
+                Add Information
               </h2>
-              <p className="text-gray-600 mb-6">
-                Create compelling copy for your lead magnet.
-              </p>
             </div>
 
             <div className="space-y-4">
@@ -470,7 +548,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                     }))
                   }
                   placeholder="e.g. Free Marketing Guide"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -488,7 +566,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                   }
                   placeholder="e.g. Learn the top 10 strategies that helped me grow my business"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -506,7 +584,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                     }))
                   }
                   placeholder="e.g. Get Free Download"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -515,10 +593,13 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
 
       case 3:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 text-sm">
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Step 3: Collect Info Fields
+                <span className="text-orange-600 rounded-full bg-orange-50 px-3 py-1 text-md mr-3">
+                  3
+                </span>{" "}
+                Collect Info Fields
               </h2>
               <p className="text-gray-600 mb-6">
                 Configure what information you want to collect from users.
@@ -535,18 +616,18 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center">
-                          <span className="text-indigo-600 text-sm font-medium">
-                            {field.type === "name"
-                              ? "👤"
-                              : field.type === "email"
-                              ? "📧"
-                              : field.type === "phone"
-                              ? "📞"
-                              : field.type === "text"
-                              ? "📝"
-                              : "❓"}
-                          </span>
+                        <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                          {field.type === "name" ? (
+                            <User className="w-4 h-4 text-orange-600" />
+                          ) : field.type === "email" ? (
+                            <Mail className="w-4 h-4 text-orange-600" />
+                          ) : field.type === "phone" ? (
+                            <Phone className="w-4 h-4 text-orange-600" />
+                          ) : field.type === "text" ? (
+                            <MessageSquare className="w-4 h-4 text-orange-600" />
+                          ) : (
+                            <HelpCircle className="w-4 h-4 text-orange-600" />
+                          )}
                         </div>
                         <div>
                           <span className="text-sm font-medium text-gray-900">
@@ -572,7 +653,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                 );
               })}
 
-              <div className="relative">
+              <div className="relative text-sm">
                 <select
                   onChange={(e) => {
                     if (e.target.value) {
@@ -580,7 +661,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                       e.target.value = "";
                     }
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none"
                 >
                   <option value="">+ Add Field</option>
                   <option value="phone">Phone Number</option>
@@ -594,67 +675,95 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
 
       case 4:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 text-sm">
             <div>
               <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Step 4: Product Delivery
+                <span className="text-orange-600 rounded-full bg-orange-50 px-3 py-1 text-md mr-3">
+                  4
+                </span>{" "}
+                Product Delivery
               </h2>
-              <p className="text-gray-600 mb-6">
-                Choose how users will receive your lead magnet after submitting their information.
-              </p>
             </div>
 
             {/* Delivery Type Selection */}
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Delivery Method
-              </label>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Upload File Option */}
-                <div 
-                  onClick={() => setLeadMagnetData(prev => ({ ...prev, deliveryType: 'upload' }))}
+                <div
+                  onClick={() =>
+                    setLeadMagnetData((prev) => ({
+                      ...prev,
+                      deliveryType: "upload",
+                    }))
+                  }
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    leadMagnetData.deliveryType === 'upload'
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                    leadMagnetData.deliveryType === "upload"
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      leadMagnetData.deliveryType === 'upload' ? 'bg-indigo-100' : 'bg-gray-100'
-                    }`}>
-                      <Upload className={`w-5 h-5 ${
-                        leadMagnetData.deliveryType === 'upload' ? 'text-indigo-600' : 'text-gray-600'
-                      }`} />
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        leadMagnetData.deliveryType === "upload"
+                          ? "bg-orange-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <Upload
+                        className={`w-5 h-5 ${
+                          leadMagnetData.deliveryType === "upload"
+                            ? "text-orange-600"
+                            : "text-gray-600"
+                        }`}
+                      />
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">Upload File</h3>
-                      <p className="text-sm text-gray-500">Upload a PDF, document, or digital file</p>
+                      <p className="text-sm text-gray-500">
+                        Upload a PDF, document, or digital file
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Redirect URL Option */}
-                <div 
-                  onClick={() => setLeadMagnetData(prev => ({ ...prev, deliveryType: 'redirect' }))}
+                <div
+                  onClick={() =>
+                    setLeadMagnetData((prev) => ({
+                      ...prev,
+                      deliveryType: "redirect",
+                    }))
+                  }
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    leadMagnetData.deliveryType === 'redirect'
-                      ? 'border-indigo-500 bg-indigo-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                    leadMagnetData.deliveryType === "redirect"
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      leadMagnetData.deliveryType === 'redirect' ? 'bg-indigo-100' : 'bg-gray-100'
-                    }`}>
-                      <Link className={`w-5 h-5 ${
-                        leadMagnetData.deliveryType === 'redirect' ? 'text-indigo-600' : 'text-gray-600'
-                      }`} />
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        leadMagnetData.deliveryType === "redirect"
+                          ? "bg-orange-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <Link
+                        className={`w-5 h-5 ${
+                          leadMagnetData.deliveryType === "redirect"
+                            ? "text-orange-600"
+                            : "text-gray-600"
+                        }`}
+                      />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">Redirect to URL</h3>
-                      <p className="text-sm text-gray-500">Redirect to a website or download link</p>
+                      <h3 className="font-medium text-gray-900">
+                        Redirect to URL
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Redirect to a website or download link
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -662,34 +771,41 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
             </div>
 
             {/* Conditional Content Based on Selection */}
-            {leadMagnetData.deliveryType === 'upload' ? (
+            {leadMagnetData.deliveryType === "upload" ? (
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700">
                   Upload Your File
                 </label>
-                
+
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                   {leadMagnetData.fileUpload || leadMagnetData.fileUrl ? (
                     <div className="text-center space-y-4">
                       <div className="flex items-center justify-center space-x-3">
-                        <FileText className="w-8 h-8 text-indigo-600" />
+                        <FileText className="w-8 h-8 text-orange-600" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">
-                            {leadMagnetData.fileUpload 
-                              ? leadMagnetData.fileUpload.name 
-                              : leadMagnetData.fileName || 'Uploaded file'}
+                            {leadMagnetData.fileUpload
+                              ? leadMagnetData.fileUpload.name
+                              : leadMagnetData.fileName || "Uploaded file"}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {leadMagnetData.fileUpload 
-                              ? `${(leadMagnetData.fileUpload.size / 1024 / 1024).toFixed(2)} MB`
-                              : leadMagnetData.fileUrl ? 'Saved to storage' : ''}
+                            {leadMagnetData.fileUpload
+                              ? `${(
+                                  leadMagnetData.fileUpload.size /
+                                  1024 /
+                                  1024
+                                ).toFixed(2)} MB`
+                              : leadMagnetData.fileUrl
+                              ? "Saved to storage"
+                              : ""}
                           </p>
                         </div>
                       </div>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => fileInputRef.current?.click()}
+                        className="text-sm shadow-none"
                       >
                         Change File
                       </Button>
@@ -698,9 +814,10 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                     <div className="text-center space-y-4">
                       <Upload className="mx-auto w-12 h-12 text-gray-400" />
                       <div>
-                        <Button 
+                        <Button
                           variant="outline"
                           onClick={() => fileInputRef.current?.click()}
+                          className="text-sm shadow-none"
                         >
                           Choose File
                         </Button>
@@ -726,16 +843,19 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
                 </label>
                 <input
                   type="url"
-                  value={leadMagnetData.redirectUrl || ''}
-                  onChange={(e) => setLeadMagnetData(prev => ({ 
-                    ...prev, 
-                    redirectUrl: e.target.value 
-                  }))}
+                  value={leadMagnetData.redirectUrl || ""}
+                  onChange={(e) =>
+                    setLeadMagnetData((prev) => ({
+                      ...prev,
+                      redirectUrl: e.target.value,
+                    }))
+                  }
                   placeholder="https://example.com/download-link"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
                 <p className="text-sm text-gray-500">
-                  Users will be redirected to this URL after submitting their information.
+                  Users will be redirected to this URL after submitting their
+                  information.
                 </p>
               </div>
             )}
@@ -847,7 +967,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading draft...</p>
         </div>
       </div>
@@ -859,30 +979,7 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
       {/* Left side - Form */}
       <div className="space-y-6">
         {/* Progress Steps */}
-        <div className="flex items-center mb-8">
-          {[1, 2, 3, 4].map((step) => (
-            <div key={step} className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step === currentStep
-                    ? "bg-indigo-600 text-white"
-                    : step < currentStep
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-600"
-                }`}
-              >
-                {step < currentStep ? "✓" : step}
-              </div>
-              {step < 4 && (
-                <div
-                  className={`w-12 h-0.5 ${
-                    step < currentStep ? "bg-green-500" : "bg-gray-200"
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+        <StepIndicator currentStep={currentStep} totalSteps={4} color="orange" />
 
         {/* Step Content */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -896,33 +993,36 @@ export function LeadMagnetCreator({ draftId }: LeadMagnetCreatorProps = {}) {
               variant="outline"
               onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
               disabled={currentStep === 1}
+              className="flex items-center cursor-pointer space-x-2 border border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white shadow-none"
             >
-              Previous
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleSaveDraft}
-              disabled={saving}
-              className="flex items-center space-x-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>{saving ? 'Saving...' : 'Save Draft'}</span>
+              <ArrowLeft className="w-4 h-4" /> Previous
             </Button>
           </div>
 
+          <Button
+            variant="outline"
+            onClick={handleSaveDraft}
+            disabled={saving}
+            className="flex items-center cursor-pointer space-x-2 border border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white shadow-none"
+          >
+            <Save className="w-4 h-4" />
+            <span>{saving ? "Saving..." : "Save Draft"}</span>
+          </Button>
           {currentStep < 4 ? (
             <Button
+              variant="outline"
               onClick={() => setCurrentStep(Math.min(4, currentStep + 1))}
+              className="flex items-center space-x-2 text-sm shadow-none bg-orange-600 text-white hover:bg-orange-700 cursor-pointer"
             >
-              Next
+              <span>Next</span> <ArrowRight className="w-4 h-4" />
             </Button>
           ) : (
             <Button
               onClick={handleCreateLeadMagnet}
               disabled={finalizing}
+              className="flex items-center space-x-2 text-sm shadow-none bg-orange-600 text-white hover:bg-orange-700 cursor-pointer"
             >
-              {finalizing ? 'Creating...' : 'Create Lead Magnet'}
+              {finalizing ? "Creating..." : "Create Lead Magnet"}
             </Button>
           )}
         </div>
