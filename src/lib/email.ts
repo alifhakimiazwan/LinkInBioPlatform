@@ -243,7 +243,7 @@ export async function sendEmail(config: EmailConfig): Promise<{ success: boolean
     
     // Handle SendGrid specific errors
     if (error && typeof error === 'object' && 'response' in error) {
-      const sgError = error as any;
+      const sgError = error as { response?: { body?: { errors?: Array<{ message?: string }> } }; message?: string };
       return { 
         success: false, 
         error: `SendGrid error: ${sgError.response?.body?.errors?.[0]?.message || sgError.message}` 

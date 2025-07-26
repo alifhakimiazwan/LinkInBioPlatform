@@ -158,14 +158,14 @@ export function DigitalProductCreator({
 
         // Load draft data
         setProductData({
-          style: digitalData.style || "button",
+          style: (digitalData?.style as "button" | "callout") || "button",
           title: draft.title || "",
           subtitle: draft.subtitle || "",
           buttonText: draft.buttonText || "Buy Now",
           price: draft.price || "0",
-          description: digitalData.description || "",
-          ctaButtonText: digitalData.ctaButtonText || "Purchase Now",
-          collectFields: digitalData.collectFields || [
+          description: digitalData?.description || "",
+          ctaButtonText: digitalData?.ctaButtonText || "Purchase Now",
+          collectFields: digitalData?.collectFields || [
             { id: "1", type: "name", label: "Name", required: true },
             { id: "2", type: "email", label: "Email", required: true },
           ],

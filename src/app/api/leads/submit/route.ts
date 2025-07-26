@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'redirect',
         redirectUrl: product.redirectUrl
-      };
+      } as { success: boolean; message: string; redirectUrl: string };
     } else {
       // Email delivery (with or without file)
       console.log('🔍 Preparing to send lead magnet email...');
@@ -118,16 +118,21 @@ export async function POST(request: NextRequest) {
         `${process.env.NEXT_PUBLIC_APP_URL}/api/download/${product.id}?email=${encodeURIComponent(leadData.customerEmail)}&token=${lead.id}` :
         null;
 
-      deliveryResult = await sendLeadMagnetEmail({
+      const emailResult = await sendLeadMagnetEmail({
         recipientEmail: leadData.customerEmail,
         recipientName: leadData.customerName || 'Friend',
         productTitle: product.title,
         productDescription: product.description || product.subtitle || '',
-        fileUrl: downloadUrl,
+        fileUrl: downloadUrl || '',
         fileName: product.fileName || `${product.title}.pdf`,
         hostName: product.user?.fullName || product.user?.username || 'Host',
         hostEmail: 'noreply@pintas.store',
       });
+
+      deliveryResult = {
+        success: emailResult.success,
+        message: emailResult.success ? 'sent' : 'failed'
+      };
       
       console.log('📧 Email delivery result:', deliveryResult);
     }
@@ -148,7 +153,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: deliveryResult.message || 'Thank you! Check your email for your download.',
-      redirectUrl: deliveryResult.redirectUrl,
+      redirectUrl: (deliveryResult as { redirectUrl?: string }).redirectUrl,
       leadId: lead?.id
     });
 

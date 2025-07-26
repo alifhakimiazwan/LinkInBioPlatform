@@ -186,23 +186,23 @@ export function WebinarCreator({ draftId }: WebinarCreatorProps = {}) {
         
         // Load draft data
         setWebinarData({
-          style: webinarFormData.style || 'button',
+          style: (webinarFormData?.style as "button" | "callout") || 'button',
           title: draft.title || "",
           subtitle: draft.subtitle || "",
           buttonText: draft.buttonText || "Register Now",
           price: draft.price || "0",
-          description: webinarFormData.description || "",
-          ctaButtonText: webinarFormData.ctaButtonText || "Register Now",
-          collectFields: webinarFormData.collectFields || [
+          description: webinarFormData?.description || "",
+          ctaButtonText: webinarFormData?.ctaButtonText || "Register Now",
+          collectFields: webinarFormData?.collectFields || [
             { id: "1", type: "name", label: "Name", required: true },
             { id: "2", type: "email", label: "Email", required: true },
           ],
-          webinarDate: webinarFormData.webinarDate || "",
-          webinarTime: webinarFormData.webinarTime || "",
-          duration: webinarFormData.duration || "60",
-          timeZone: webinarFormData.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-          maxAttendees: webinarFormData.maxAttendees || "100",
-          meetingPlatform: webinarFormData.meetingPlatform || "zoom",
+          webinarDate: webinarFormData?.webinarDate || "",
+          webinarTime: webinarFormData?.webinarTime || "",
+          duration: webinarFormData?.duration || "60",
+          timeZone: webinarFormData?.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          maxAttendees: webinarFormData?.maxAttendees || "100",
+          meetingPlatform: webinarFormData?.meetingPlatform || "zoom",
         });
 
         // Set image previews if they exist
