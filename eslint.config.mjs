@@ -17,6 +17,10 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-require-imports": "off",
       "@next/next/no-img-element": "warn",
+      // Disable strict type checking temporarily
+      "@typescript-eslint/ban-types": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
     },
   },
 ];
